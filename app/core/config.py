@@ -1,10 +1,20 @@
-import os
-from dotenv import load_dotenv
+from pydantic import BaseSettings, SecretStr
+from functools import lru_cache
 
-load_dotenv()
+class Settings(BaseSettings):
+    OPENAI_API_KEY: SecretStr
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:mdkaii@localhost/vazorat_ai"
+    JWT_SECRET_KEY: SecretStr
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ALLOWED_HOSTS: list = ["*"]
+    DEBUG: bool = False
 
-class Settings:
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    class Config:
+        env_file = ".env"
 
-settings = Settings()
+@lru_cache()
+def get_settings():
+    return Settings()
+
+settings = get_settings()

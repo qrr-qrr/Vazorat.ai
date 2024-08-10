@@ -1,18 +1,19 @@
 import openai
 from app.core.config import settings
 
-openai.api_key = settings.OPENAI_API_KEY
-
 class OpenAIService:
     @staticmethod
-    async def get_response(prompt: str, language: str = "ru"):
-        response = openai.Completion.create(
-            engine="davinci",
-            prompt=prompt,
-            max_tokens=150,
-            temperature=0.7,
-            n=1,
-            stop=None,
-            language=language
-        )
-        return response.choices[0].text.strip()
+    async def get_response(query: str, language: str):
+        openai.api_key = settings.OPENAI_API_KEY
+        
+        try:
+            response = await openai.ChatCompletion.acreate(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": f"You are an AI assistant for the Ministries of Tajikistan. Respond in {language}."},
+                    {"role": "user", "content": query}
+                ]
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            raise Exception(f"Error in OpenAI API call: {str(e)}")
